@@ -1,8 +1,7 @@
 <h3 align="left">Connect with me!</h3>
 
-[![E-mail](https://img.shields.io/badge/-Email-000?style=for-the-badge&logo=microsoft-outlook&logoColor=FF00E3&color:FFF)](mailto:leonardovanni21@gmail.com)
-[![LinkedIn](https://img.shields.io/badge/-LinkedIn-000?style=for-the-badge&logo=linkedin&logoColor=FF00E3&color:FFF)](https://www.linkedin.com/in/leonardo-vanni-bonavigo-6a387020b/)
-[![Instagram](https://img.shields.io/badge/-Instagram-000?style=for-the-badge&logo=instagram&logoColor=FF00E3&color:FFF)](https://www.instagram.com/leonardobonavigo/)
+[![LinkedIn](https://img.shields.io/badge/-LinkedIn-000?style=for-the-badge&color:FFF)](https://www.linkedin.com/in/leonardo-vanni-bonavigo-6a387020b/)
+[![Instagram](https://img.shields.io/badge/-Instagram-000?style=for-the-badge&color:FFF)](https://www.instagram.com/leonardobonavigo)/)
 
 #
 
