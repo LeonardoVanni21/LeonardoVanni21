@@ -1,5 +1,5 @@
-[![Instagram](https://img.shields.io/badge/-Instagram-000?style=for-the-badge&color:FFF)](https://www.instagram.com/leonardobonavigo)
-[![LinkedIn](https://img.shields.io/badge/-LinkedIn-000?style=for-the-badge&color:FFF)](https://www.linkedin.com/in/leonardo-vanni-bonavigo-6a387020b/)
+[![Instagram](https://img.shields.io/badge/-Instagram-000?style=for-the-badge&color:12261E)](https://www.instagram.com/leonardobonavigo)
+[![LinkedIn](https://img.shields.io/badge/-LinkedIn-000?style=for-the-badge&color:12261E)](https://www.linkedin.com/in/leonardo-vanni-bonavigo-6a387020b/)
 
 #
 
