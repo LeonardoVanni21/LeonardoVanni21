@@ -37,15 +37,11 @@
 <h3><code>leo@github ~ $ ./stats.sh</code></h3>
 <table>
   <tr>
-    <td valign="top">
-      <img src="https://github-readme-stats.vercel.app/api?username=LeonardoVanni21&show_icons=true&include_all_commits=true&count_private=true&hide_border=true&bg_color=0d1117&title_color=39d353&text_color=c9d1d9&icon_color=39d353" alt="GitHub stats" />
-    </td>
-    <td valign="top">
-      <img src="https://streak-stats.demolab.com/?user=LeonardoVanni21&hide_border=true&background=0d1117&stroke=21262d&ring=39d353&fire=39d353&currStreakLabel=39d353&sideLabels=c9d1d9&dates=8b949e&currStreakNum=c9d1d9&sideNums=c9d1d9" alt="GitHub streak" />
-    </td>
+    <td valign="top"><img src="./stats-card.svg" width="440" alt="GitHub stats" /></td>
+    <td valign="top"><img src="./langs-card.svg" width="440" alt="Top languages" /></td>
   </tr>
 </table>
 
-<img src="https://github-readme-stats.vercel.app/api/top-langs/?username=LeonardoVanni21&layout=compact&langs_count=8&hide_border=true&bg_color=0d1117&title_color=39d353&text_color=c9d1d9" alt="Top languages" />
+<img src="https://streak-stats.demolab.com/?user=LeonardoVanni21&hide_border=true&background=0d1117&stroke=21262d&ring=39d353&fire=39d353&currStreakLabel=39d353&sideLabels=c9d1d9&dates=8b949e&currStreakNum=c9d1d9&sideNums=c9d1d9" alt="GitHub streak" />
 
 </div>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="202"
+     viewBox="0 0 440 202" role="img" aria-label="Top languages">
+  <style>
+    text{font-family:ui-monospace,'DejaVu Sans Mono',Consolas,monospace;}
+    .title{fill:#39d353;font-size:14px;font-weight:700;}
+    .lname{fill:#c9d1d9;font-size:12px;}
+    .lpct{fill:#8b949e;font-size:12px;}
+  </style>
+  <rect width="440" height="202" rx="12" fill="#0d1117"/>
+  <rect x="1" y="1" width="438" height="200" rx="12" fill="none" stroke="#21262d"/>
+  <text x="24" y="36" class="title">~ $ top --languages</text>
+  <clipPath id="barclip"><rect x="24" y="58" width="392" height="14" rx="7"/></clipPath>
+  <g clip-path="url(#barclip)"><rect x="24.0" y="58" width="196.1" height="14" fill="#3178c6"/><rect x="220.1" y="58" width="39.3" height="14" fill="#663399"/><rect x="259.4" y="58" width="38.2" height="14" fill="#e34c26"/><rect x="297.6" y="58" width="32.2" height="14" fill="#f1e05a"/><rect x="329.8" y="58" width="18.5" height="14" fill="#00B4AB"/><rect x="348.3" y="58" width="15.7" height="14" fill="#178600"/><rect x="364.0" y="58" width="13.6" height="14" fill="#f34b7d"/><rect x="377.6" y="58" width="12.4" height="14" fill="#3572A5"/></g>
+  <circle cx="29" cy="96" r="5" fill="#3178c6"/><text x="42" y="100" class="lname">TypeScript</text><text x="204" y="100" class="lpct" text-anchor="end">50.0%</text><circle cx="225" cy="96" r="5" fill="#663399"/><text x="238" y="100" class="lname">CSS</text><text x="400" y="100" class="lpct" text-anchor="end">10.0%</text><circle cx="29" cy="120" r="5" fill="#e34c26"/><text x="42" y="124" class="lname">HTML</text><text x="204" y="124" class="lpct" text-anchor="end">9.7%</text><circle cx="225" cy="120" r="5" fill="#f1e05a"/><text x="238" y="124" class="lname">JavaScript</text><text x="400" y="124" class="lpct" text-anchor="end">8.2%</text><circle cx="29" cy="144" r="5" fill="#00B4AB"/><text x="42" y="148" class="lname">Dart</text><text x="204" y="148" class="lpct" text-anchor="end">4.7%</text><circle cx="225" cy="144" r="5" fill="#178600"/><text x="238" y="148" class="lname">C#</text><text x="400" y="148" class="lpct" text-anchor="end">4.0%</text><circle cx="29" cy="168" r="5" fill="#f34b7d"/><text x="42" y="172" class="lname">C++</text><text x="204" y="172" class="lpct" text-anchor="end">3.5%</text><circle cx="225" cy="168" r="5" fill="#3572A5"/><text x="238" y="172" class="lname">Python</text><text x="400" y="172" class="lpct" text-anchor="end">3.2%</text>
+</svg>

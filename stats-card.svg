@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="200"
+     viewBox="0 0 440 200" role="img" aria-label="GitHub stats">
+  <style>
+    text{font-family:ui-monospace,'DejaVu Sans Mono',Consolas,monospace;}
+    .title{fill:#39d353;font-size:14px;font-weight:700;}
+    .num{fill:#c9d1d9;font-size:26px;font-weight:700;}
+    .lbl{fill:#8b949e;font-size:12px;}
+    .cell{opacity:0;animation:fin .5s ease-out forwards;}
+    @keyframes fin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+  <rect width="440" height="200" rx="12" fill="#0d1117"/>
+  <rect x="1" y="1" width="438" height="198" rx="12" fill="none" stroke="#21262d"/>
+  <text x="24" y="36" class="title">~ $ gh stats</text>
+  <g class="cell" style="animation-delay:0.0s"><text x="24" y="90" class="num">3,343</text><text x="24" y="110" class="lbl">Contributions (1y)</text></g><g class="cell" style="animation-delay:0.1s"><text x="228" y="90" class="num">29</text><text x="228" y="110" class="lbl">Repositories</text></g><g class="cell" style="animation-delay:0.2s"><text x="24" y="160" class="num">6</text><text x="24" y="180" class="lbl">Followers</text></g><g class="cell" style="animation-delay:0.3s"><text x="228" y="160" class="num">1</text><text x="228" y="180" class="lbl">Stars earned</text></g>
+</svg>
