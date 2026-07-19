@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="434"
+     viewBox="0 0 520 434" font-family="ui-monospace, SFMono-Regular, 'DejaVu Sans Mono', Consolas, monospace" role="img"
+     aria-label="Profile info card for Leonardo Vanni Bonavigo">
+  <style>
+    @keyframes slidein {
+      from { opacity:0; transform:translateX(-10px); }
+      to   { opacity:1; transform:translateX(0); }
+    }
+    .row { opacity:0; animation:slidein .5s ease-out forwards; }
+    text { font-size:14px; }
+    .host { fill:#39d353; font-size:15px; font-weight:700; }
+    .dim  { fill:#8b949e; }
+    .key  { fill:#39d353; }
+    .sep  { fill:#8b949e; }
+    .val  { fill:#c9d1d9; }
+  </style>
+  <rect width="520" height="434" rx="10" fill="#0d1117"/>
+  <rect x="1" y="1" width="518" height="432" rx="10"
+        fill="none" stroke="#21262d"/>
+  <g class="row" style="animation-delay:0.00s"><text x="24" y="54" class="host">leonardovanni21@github</text></g><g class="row" style="animation-delay:0.12s"><text x="24" y="72" class="dim">----------------------</text></g><g class="row" style="animation-delay:0.24s"><text x="24" y="98"><tspan class="key">name</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">Leonardo Vanni Bonavigo</tspan></text></g><g class="row" style="animation-delay:0.36s"><text x="24" y="124"><tspan class="key">role</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">Backend Software Engineer</tspan></text></g><g class="row" style="animation-delay:0.48s"><text x="24" y="150"><tspan class="key">company</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">Epicora Software House</tspan></text></g><g class="row" style="animation-delay:0.60s"><text x="24" y="176"><tspan class="key">location</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">Chapecó — SC, Brazil</tspan></text></g><g class="row" style="animation-delay:0.72s"><text x="24" y="202"><tspan class="key">exp</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">4+ yrs · 30+ systems shipped</tspan></text></g><g class="row" style="animation-delay:0.84s"><text x="24" y="228"><tspan class="key">lang</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">TypeScript · Node.js · C#</tspan></text></g><g class="row" style="animation-delay:0.96s"><text x="24" y="254"><tspan class="key">stack</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">NestJS · .NET · Laravel</tspan></text></g><g class="row" style="animation-delay:1.08s"><text x="24" y="280"><tspan class="key">cloud</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">AWS · Docker · CI/CD</tspan></text></g><g class="row" style="animation-delay:1.20s"><text x="24" y="306"><tspan class="key">db</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">MongoDB · PostgreSQL · Redis</tspan></text></g><g class="row" style="animation-delay:1.32s"><text x="24" y="332"><tspan class="key">auth</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">OAuth2 · JWT · Security</tspan></text></g><g class="row" style="animation-delay:1.44s"><text x="24" y="358"><tspan class="key">langs</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">PT native · EN advanced</tspan></text></g><g class="row" style="animation-delay:1.56s"><text x="24" y="384"><tspan class="key">focus</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">Scalable backend systems</tspan></text></g><g class="row" style="animation-delay:1.68s"><text x="24" y="410"><tspan class="key">uptime</tspan><tspan class="sep">: </tspan><tspan class="val" x="116">Creating Luck 🍀</tspan></text></g>
+</svg>

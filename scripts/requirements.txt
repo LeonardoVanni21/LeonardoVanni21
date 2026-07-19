@@ -1,0 +1,8 @@
+# Full set — used LOCALLY to generate the portrait + info card.
+# The daily GitHub Actions workflow uses requirements-ci.txt (much lighter).
+requests==2.32.3
+beautifulsoup4==4.12.3
+pillow
+numpy
+opencv-python
+rembg

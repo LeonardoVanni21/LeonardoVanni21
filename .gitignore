@@ -1,0 +1,7 @@
+# Local-only working files (never needed on GitHub)
+scripts/work/
+scripts/input/
+__pycache__/
+*.pyc
+.venv/
+venv/
