@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="495" height="180"
+     viewBox="0 0 495 180" role="img" aria-label="Contribution streak">
+  <style>
+    text{font-family:ui-monospace,'DejaVu Sans Mono',Consolas,monospace;}
+    .big{fill:#c9d1d9;font-size:34px;font-weight:700;}
+    .ring{fill:#39d353;}
+    .lbl{fill:#39d353;font-size:13px;font-weight:700;}
+    .sub{fill:#8b949e;font-size:10px;}
+  </style>
+  <rect width="495" height="180" rx="12" fill="#0d1117"/>
+  <rect x="1" y="1" width="493" height="178" rx="12" fill="none" stroke="#21262d"/>
+  <line x1="165" y1="30" x2="165" y2="150" stroke="#21262d"/><line x1="330" y1="30" x2="330" y2="150" stroke="#21262d"/>
+  <text x="82.5" y="78" text-anchor="middle" class="big">3,343</text><text x="82.5" y="132" text-anchor="middle" class="lbl">Total (1y)</text><text x="82.5" y="152" text-anchor="middle" class="sub">Jul 20 – Jul 19</text><circle cx="247.5" cy="70" r="40" fill="none" stroke="#39d353" stroke-width="4"/><text x="247.5" y="78" text-anchor="middle" class="big ring">7</text><text x="247.5" y="132" text-anchor="middle" class="lbl">Current Streak</text><text x="247.5" y="152" text-anchor="middle" class="sub">Jul 13 – Jul 19</text><text x="412.5" y="78" text-anchor="middle" class="big">12</text><text x="412.5" y="132" text-anchor="middle" class="lbl">Longest Streak</text><text x="412.5" y="152" text-anchor="middle" class="sub">Feb 2 – Feb 13</text>
+</svg>

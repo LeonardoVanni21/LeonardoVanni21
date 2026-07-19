@@ -42,6 +42,6 @@
   </tr>
 </table>
 
-<img src="https://streak-stats.demolab.com/?user=LeonardoVanni21&hide_border=true&background=0d1117&stroke=21262d&ring=39d353&fire=39d353&currStreakLabel=39d353&sideLabels=c9d1d9&dates=8b949e&currStreakNum=c9d1d9&sideNums=c9d1d9" alt="GitHub streak" />
+<img src="./streak-card.svg" width="495" alt="Contribution streak" />
 
 </div>
