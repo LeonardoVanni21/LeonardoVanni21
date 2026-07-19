@@ -19,7 +19,10 @@ jobs:
       - run: pip install -r scripts/requirements-ci.txt
       - run: python scripts/fetch_contributions.py
       - run: python scripts/render_heatmap_svg.py
+      # Streak card only reads the JSON above — no token needed, so it can
+      # refresh daily too. (stats/langs cards need a PAT, so they stay manual.)
+      - run: python scripts/make_streak_card.py
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: refresh contribution graph [skip ci]"
-          file_pattern: "data/contributions.json contrib-heatmap.svg"
+          file_pattern: "data/contributions.json contrib-heatmap.svg streak-card.svg"
