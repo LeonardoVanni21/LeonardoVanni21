@@ -6,7 +6,7 @@
 
 <p><em>Construindo sistemas que geram impacto no mundo real.</em></p>
 
-<a href="https://portfolio-v2-omega-swart.vercel.app/">Portfólio</a>
+<a href="https://leonardo-vanni-portfolio.vercel.app/">Portfólio</a>
 &nbsp;·&nbsp;
 <a href="https://www.linkedin.com/in/leonardo-vanni-bonavigo-6a387020b/">LinkedIn</a>
 &nbsp;·&nbsp;
