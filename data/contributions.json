@@ -1,42 +1,7 @@
 {
   "username": "LeonardoVanni21",
-  "total": 3864,
+  "total": 3811,
   "days": [
-    {
-      "date": "2025-09-14",
-      "level": 0,
-      "count": 0
-    },
-    {
-      "date": "2025-09-15",
-      "level": 1,
-      "count": 11
-    },
-    {
-      "date": "2025-09-16",
-      "level": 2,
-      "count": 18
-    },
-    {
-      "date": "2025-09-17",
-      "level": 1,
-      "count": 11
-    },
-    {
-      "date": "2025-09-18",
-      "level": 2,
-      "count": 24
-    },
-    {
-      "date": "2025-09-19",
-      "level": 1,
-      "count": 4
-    },
-    {
-      "date": "2025-09-20",
-      "level": 0,
-      "count": 0
-    },
     {
       "date": "2025-09-21",
       "level": 0,
@@ -1854,8 +1819,13 @@
     },
     {
       "date": "2026-09-19",
-      "level": 1,
-      "count": 12
+      "level": 3,
+      "count": 27
+    },
+    {
+      "date": "2026-09-20",
+      "level": 0,
+      "count": 0
     }
   ]
 }
