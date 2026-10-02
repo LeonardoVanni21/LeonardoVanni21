@@ -1,6 +1,6 @@
 {
   "username": "LeonardoVanni21",
-  "total": 3950,
+  "total": 3970,
   "days": [
     {
       "date": "2025-09-28",
@@ -680,12 +680,12 @@
     {
       "date": "2026-02-10",
       "level": 3,
-      "count": 32
+      "count": 31
     },
     {
       "date": "2026-02-11",
       "level": 4,
-      "count": 50
+      "count": 49
     },
     {
       "date": "2026-02-12",
@@ -1844,8 +1844,13 @@
     },
     {
       "date": "2026-10-01",
-      "level": 1,
-      "count": 2
+      "level": 2,
+      "count": 24
+    },
+    {
+      "date": "2026-10-02",
+      "level": 0,
+      "count": 0
     }
   ]
 }
