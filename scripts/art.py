@@ -7,7 +7,6 @@ import html
 import os
 
 from fontTools.pens.svgPathPen import SVGPathPen
-from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
 
 from config import USERNAME  # noqa: F401  (re-exported for the generators)
@@ -64,19 +63,9 @@ class Face:
         k = size / self.upm
         return sum(self.hmtx[self._gname(c)][0] * k + track * size for c in s)
 
-    def outline(self, s, x, y, size, anchor="start", track=0.0):
-        if anchor == "middle":
-            x -= self.width(s, size, track) / 2
-        elif anchor == "end":
-            x -= self.width(s, size, track)
-        k = size / self.upm
-        pen = SVGPathPen(self.glyphs, ntos=_num)
-        cx = x
-        for c in s:
-            g = self._gname(c)
-            if c != " ":
-                self.glyphs[g].draw(TransformPen(pen, (k, 0, 0, -k, cx, y)))
-            cx += self.hmtx[g][0] * k + track * size
+    def glyph_path(self, g):
+        pen = SVGPathPen(self.glyphs, ntos=lambda v: str(int(round(v))))
+        self.glyphs[g].draw(pen)
         return pen.getCommands()
 
 
@@ -86,9 +75,36 @@ def face(name):
     return _faces[name]
 
 
+_defs = {}  # glyph id -> outline, shared by every string in one SVG
+
+
 def text(font, s, x, y, size, fill, anchor="start", track=0.0, extra=""):
-    d = face(font).outline(s, x, y, size, anchor, track)
-    return f'<path d="{d}" fill="{fill}" {extra}/>' if d else ""
+    f = face(font)
+    if anchor == "middle":
+        x -= f.width(s, size, track) / 2
+    elif anchor == "end":
+        x -= f.width(s, size, track)
+    k = size / f.upm
+    uses, cx = [], 0.0
+    for c in s:
+        g = f._gname(c)
+        if c != " ":
+            gid = f"{font.replace('-', '')}{f.font.getGlyphID(g)}"
+            if gid not in _defs:
+                _defs[gid] = f.glyph_path(g)
+            if _defs[gid]:
+                uses.append(f'<use href="#{gid}" x="{cx:g}"/>')
+        cx += f.hmtx[g][0] + track * f.upm
+    if not uses:
+        return ""
+    return (f'<g transform="matrix({k:.5f} 0 0 {-k:.5f} {x:.1f} {y:.1f})" '
+            f'fill="{fill}" {extra}>{"".join(uses)}</g>')
+
+
+def drain_defs():
+    d = "".join(f'<path id="{i}" d="{p}"/>' for i, p in _defs.items() if p)
+    _defs.clear()
+    return f"<defs>{d}</defs>" if d else ""
 
 
 def width(font, s, size, track=0.0):
@@ -124,7 +140,7 @@ def sheet(w, h, body, t, css="", label="", rx=14):
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
         f'viewBox="0 0 {w} {h}" role="img" aria-label="{esc(label)}">'
-        f"<style>{css}{calm}{preview}</style>"
+        f"<style>{css}{calm}{preview}</style>{drain_defs()}"
         f'<rect width="{w}" height="{h}" rx="{rx}" fill="{t["bg"]}"/>'
         f'<rect x=".5" y=".5" width="{w - 1}" height="{h - 1}" rx="{rx}" '
         f'fill="none" stroke="{t["line"]}"/>'

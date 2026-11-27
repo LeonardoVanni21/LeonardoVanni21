@@ -5,7 +5,7 @@ These rarely change, so they are not rebuilt in CI. Run locally:
 """
 import os
 
-from art import ART_DIR, ROOT, THEMES, W, delay, esc, sheet, text, width, write_all
+from art import ART_DIR, drain_defs, ROOT, THEMES, W, delay, esc, sheet, text, width, write_all
 
 # ---------------------------------------------------------------- hero
 
@@ -110,7 +110,7 @@ def pill(label, primary):
                 f'stroke-opacity="{1 if primary else .35}"/>'
                 + text("mono-b", label, 22, 24.5, 12, fg, track=0.14) + arrow)
         return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
-                f'viewBox="0 0 {w} {h}" role="img" aria-label="{label.title()}">{body}</svg>')
+                f'viewBox="0 0 {w} {h}" role="img" aria-label="{label.title()}">{drain_defs()}{body}</svg>')
     return build
 
 
