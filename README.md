@@ -57,6 +57,13 @@
 
 <br>
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./art/snake-dark.svg">
+  <img src="./art/snake-light.svg" width="860" alt="A snake eating the contribution grid, then starting over.">
+</picture>
+
+<br>
+
 <sub>Everything above is generated from this repo's <a href="./scripts">scripts</a> and refreshed daily by GitHub Actions. No third-party image services.</sub>
 
 </div>

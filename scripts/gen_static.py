@@ -36,7 +36,7 @@ def hero(t):
     phrases = []
     for i, p in enumerate(ROLES):
         phrases.append(
-            f'<g class="ph" style="{delay(i * 4)}">'
+            f'<g class="ph{" ov" if i else ""}" style="{delay(i * 4)}">'
             f'{text("serif-i", p, pad, 256, 40, t["fg"])}</g>')
 
     sep = "   /   "
@@ -142,7 +142,7 @@ def wrap(font, s, size, maxw):
 
 
 def work(t):
-    H, pad, gap = 396, 44, 18
+    H, pad, gap = 412, 44, 18
     cw = (W - 2 * pad - 2 * gap) / 3
     css = ("@keyframes rise{from{opacity:0;transform:translateY(16px)}}"
            ".c{animation:rise .8s cubic-bezier(.22,1,.36,1) both}")
@@ -163,7 +163,7 @@ def work(t):
             tx += tw + 5
         cards.append(
             f'<g class="c" style="{delay(0.1 + i * 0.12)}">'
-            f'<rect x="{x:.1f}" y="88" width="{cw:.1f}" height="272" rx="10" '
+            f'<rect x="{x:.1f}" y="88" width="{cw:.1f}" height="296" rx="10" '
             f'fill="{t["soft"]}" stroke="{t["line"]}"/>'
             + text("mono", f"({idx})", ix, 116, 11, t["sage"], track=0.1)
             + text("serif", big, ix, 176, 62, t["fg"])
@@ -173,7 +173,7 @@ def work(t):
             + "".join(text("serif", l, ix, 260 + k * 19, 16, t["muted"])
                       for k, l in enumerate(dl))
             + "".join(tagrow)
-            + text("mono", foot.upper(), ix, 366, 8.5, t["muted"], track=0.04)
+            + text("mono", foot.upper(), ix, 370, 8.5, t["muted"], track=0.04)
             + "</g>")
     body = (
         text("mono", "SELECTED WORK / 03", pad, 50, 11, t["muted"], track=0.14)
@@ -244,12 +244,12 @@ def architecture(t):
             f'fill="{t["soft"]}" stroke="{t["line"]}"/>'
             + text("display", title, cx[i], cy - 4, 17, t["fg"], "middle", -0.01)
             + text("mono", sub.upper(), cx[i], cy + 18, 9, t["muted"], "middle", 0.1)
-            + f'<g class="n{i}" style="{delay(0)}"><rect x="{x:.1f}" y="{cy - bh / 2}" width="{bw}" height="{bh}" '
+            + f'<g class="n{i} ov" style="{delay(0)}"><rect x="{x:.1f}" y="{cy - bh / 2}" width="{bw}" height="{bh}" '
             f'rx="8" fill="{t["fg"]}"/>'
             + text("display", title, cx[i], cy - 4, 17, t["bg"], "middle", -0.01)
             + text("mono", sub.upper(), cx[i], cy + 18, 9, t["bg"], "middle", 0.1)
             + "</g></g>")
-    for cls, y in (("pk", cy), ("rt", ret_y)):
+    for cls, y in (("pk", cy), ("rt ov", ret_y)):
         parts.append(
             f'<g class="{cls}" style="{delay(0)}"><circle cx="{cx[0]:.1f}" cy="{y}" r="11" fill="{t["rust"]}" '
             f'opacity=".22"/><circle cx="{cx[0]:.1f}" cy="{y}" r="5" fill="{t["rust"]}"/></g>')
@@ -288,6 +288,9 @@ def profile(t):
     css = ("@keyframes wipe{from{opacity:0;clip-path:inset(0 100% 0 0)}"
            "to{opacity:1;clip-path:inset(0 0 0 0)}}"
            "@keyframes rise{from{opacity:0;transform:translateY(12px)}}"
+           f"@keyframes scan{{0%{{transform:translateY(-30px)}}65%,100%{{transform:translateY({ph:.0f}px)}}}}"
+           "@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}"
+           ".sc{animation:scan 7s ease-in-out infinite}.cr{animation:blink 1.1s steps(1) infinite}"
            ".p{animation:wipe .7s ease-out both}"
            ".f{animation:rise .7s cubic-bezier(.22,1,.36,1) both}"
            ".a{font-family:ui-monospace,SFMono-Regular,Consolas,'DejaVu Sans Mono',monospace;"
@@ -310,7 +313,17 @@ def profile(t):
         text("mono", "WHOAMI / SPEC SHEET", pad, 50, 11, t["muted"], track=0.14)
         + text("mono", "LEONARDO VANNI BONAVIGO", W - pad, 50, 11, t["muted"], "end", 0.14)
         + f'<line x1="{pad}" x2="{W - pad}" y1="68" y2="68" stroke="{t["line"]}"/>'
-        + art + "".join(rows))
+        + art
+        + f'<defs><linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">'
+        f'<stop offset="0" stop-color="{t["sage"]}" stop-opacity="0"/>'
+        f'<stop offset=".5" stop-color="{t["sage"]}" stop-opacity=".55"/>'
+        f'<stop offset="1" stop-color="{t["sage"]}" stop-opacity="0"/></linearGradient>'
+        f'<clipPath id="pc"><rect x="{pad}" y="{top}" width="{pw:.0f}" height="{ph:.0f}"/></clipPath></defs>'
+        + f'<g clip-path="url(#pc)"><rect class="sc ov" style="{delay(0)}" x="{pad}" y="{top}" '
+        f'width="{pw:.0f}" height="30" fill="url(#sg)"/></g>'
+        + "".join(rows)
+        + f'<rect class="cr ov" style="{delay(0)}" x="{rx0 + width("serif", FIELDS[-1][1], 23) + 8:.1f}" '
+        f'y="{top + 14 + (len(FIELDS) - 1) * rh + 6:.1f}" width="10" height="19" fill="{t["deep"]}"/>')
     return sheet(W, H, body, t, css, "Portrait and profile sheet for Leonardo Vanni")
 
 
