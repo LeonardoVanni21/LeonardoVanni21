@@ -255,7 +255,7 @@ def languages(gh):
         css = PULSE_CSS + (
             "@keyframes wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}"
             "@keyframes rise{from{opacity:0;transform:translateY(10px)}}"
-            f"@keyframes spot{{0%,{hold:.1f}%{{opacity:1}}{hold + 4:.1f}%,100%{{opacity:.38}}}}"
+            f"@keyframes spot{{0%,{hold:.1f}%{{opacity:1}}{hold + 4:.1f}%,100%{{opacity:.48}}}}"
             ".b{animation:wipe 1.1s cubic-bezier(.22,1,.36,1) both}"
             ".l{animation:rise .6s cubic-bezier(.22,1,.36,1) both}"
             f".sp{{animation:spot {cycle}s ease-in-out infinite}}")
