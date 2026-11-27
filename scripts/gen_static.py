@@ -185,76 +185,168 @@ def work(t):
 
 # ---------------------------------------------------------------- architecture
 
-NODES = [("Client", "HTTP / REST"), ("API", "NestJS · Node"),
-         ("Cache", "Redis"), ("Database", "MongoDB")]
-LINKS_LBL = ["request", "cache check", "query"]
+SYSTEMS = [
+    ("01", "Sports Consulting SaaS", "NESTJS · MULTI-TENANT · MONGODB · REDIS", [
+        ("White-label", "Interface and identity configured per consultancy."),
+        ("NestJS API", "Business rules and context for every tenant."),
+        ("Tenant layer", "Strict data isolation between operations."),
+        ("MongoDB + Redis", "Record persistence and performance layer."),
+        ("Contextual AI", "Chat tailored to students and consultancies."),
+    ]),
+    ("02", "Vehicle Financing Management", "NESTJS · ERP INTEGRATION · SECURITY · MONGODB", [
+        ("Operations", "Proposal workflow used by teams and branches."),
+        ("NestJS API", "Orchestrates financing rules, security and state."),
+        ("Validation", "Queries and approval across multiple institutions."),
+        ("ERP + inventory", "Deep integration and bidirectional synchronization."),
+        ("MongoDB", "History and persistence for critical processes."),
+    ]),
+    ("03", "Video & Marketing Production", "NESTJS · GOOGLE API · STRIPE · MICROSERVICES", [
+        ("Workspace", "Centralized operations for production companies and teams."),
+        ("NestJS core", "Coordinates users, projects and platform rules."),
+        ("Microservices", "Separates uploads, media and processing tasks."),
+        ("AI agents", "Orchestrates automation for production and marketing."),
+        ("Google + Stripe", "Two-way calendar and subscription lifecycle."),
+    ]),
+]
+PERIOD = 10.0                       # seconds each system stays on screen
+CYCLE = PERIOD * len(SYSTEMS)
+
+
+def _level(pulses, fade, t):
+    """Visibility (0..1) at time t for periodic trapezoid pulses."""
+    best = 0.0
+    for start, end in pulses:
+        for shift in (-CYCLE, 0, CYCLE):
+            a, b = start + shift, end + shift
+            if t < a or t > b + fade:
+                continue
+            v = min(1.0, (t - a) / fade) if t < b else max(0.0, 1 - (t - b) / fade)
+            best = max(best, v)
+    return best
+
+
+def pulse_kf(name, pulses, fade):
+    times = {0.0, CYCLE}
+    for s, e in pulses:
+        for x in (s, s + fade, e, e + fade):
+            times.add(round(x % CYCLE if x % CYCLE or x == 0 else CYCLE, 3))
+    stops = "".join(
+        f"{100 * x / CYCLE:.3f}%{{opacity:{_level(pulses, fade, x % CYCLE if x < CYCLE else 0):.3f}}}"
+        for x in sorted(times))
+    return f"@keyframes {name}{{{stops}}}"
+
+
+def move_kf(name, points):
+    stops = "".join(f"{100 * x / CYCLE:.3f}%{{transform:translateX({v:.1f}px)}}"
+                    for x, v in points)
+    return f"@keyframes {name}{{{stops}}}"
+
+
+def fit(font, s, size, maxw):
+    return min(size, size * maxw / width(font, s, size))
 
 
 def architecture(t):
-    H, pad, bw, bh, cy = 248, 44, 128, 76, 130
-    n = len(NODES)
+    H, pad, bw, bh, cy = 340, 44, 136, 70, 214
+    n = 5
     step = (W - 2 * pad - bw) / (n - 1)
     cx = [pad + bw / 2 + i * step for i in range(n)]
-    dur = 9
-    arrive = [0, 22, 48, 74]
+    fade = 0.5
+    kf, css_rules, layers = [], [], []
 
-    kf = ["@keyframes rise{from{opacity:0;transform:translateY(14px)}}",
-          "@keyframes flow{to{stroke-dashoffset:-14}}"]
-    for i, a in enumerate(arrive):
-        kf.append(f"@keyframes n{i}{{0%{{opacity:0}}{max(a - 1, 0)}%{{opacity:0}}"
-                  f"{a + 2}%{{opacity:1}}{a + 12}%{{opacity:1}}{a + 17}%{{opacity:0}}100%{{opacity:0}}}}")
-    d = step
-    kf.append(f"@keyframes fwd{{0%,8%{{transform:translateX(0);opacity:1}}"
-              f"22%,34%{{transform:translateX({d:.1f}px);opacity:1}}"
-              f"48%,60%{{transform:translateX({2 * d:.1f}px);opacity:1}}"
-              f"74%,84%{{transform:translateX({3 * d:.1f}px);opacity:1}}"
-              f"86%,100%{{transform:translateX({3 * d:.1f}px);opacity:0}}}}")
-    kf.append(f"@keyframes ret{{0%,85%{{transform:translateX({3 * d:.1f}px);opacity:0}}"
-              f"86%{{transform:translateX({3 * d:.1f}px);opacity:1}}"
-              f"98%{{transform:translateX(0);opacity:1}}100%{{transform:translateX(0);opacity:0}}}}")
-    css = "".join(kf) + (
-        ".r{animation:rise .8s cubic-bezier(.22,1,.36,1) both}"
-        ".fl{animation:flow 1s linear infinite}"
-        f".pk{{animation:fwd {dur}s cubic-bezier(.65,0,.35,1) infinite}}"
-        f".rt{{animation:ret {dur}s cubic-bezier(.65,0,.35,1) infinite}}"
-        + "".join(f".n{i}{{animation:n{i} {dur}s infinite}}" for i in range(n)))
+    css_rules.append(".r{animation:rise .8s cubic-bezier(.22,1,.36,1) both}"
+                     ".fl{animation:flow 1s linear infinite}")
+    kf.append("@keyframes rise{from{opacity:0;transform:translateY(14px)}}"
+              "@keyframes flow{to{stroke-dashoffset:-14}}")
 
-    parts = [
+    # Static skeleton shared by every system: boxes and dashed links.
+    skeleton = [
         text("mono", "REQUEST FLOW / LIVE", pad, 50, 11, t["muted"], track=0.14),
-        text("mono", "A REQUEST, END TO END", W - pad, 50, 11, t["muted"], "end", 0.14),
+        text("mono", "THREE PRODUCTION SYSTEMS, ONE AT A TIME", W - pad, 50, 11,
+             t["muted"], "end", 0.14),
         f'<line x1="{pad}" x2="{W - pad}" y1="68" y2="68" stroke="{t["line"]}"/>',
     ]
     for i in range(n - 1):
         x1, x2 = cx[i] + bw / 2, cx[i + 1] - bw / 2
-        parts.append(
+        skeleton.append(
             f'<line class="fl" style="{delay(0)}" x1="{x1:.1f}" x2="{x2:.1f}" y1="{cy}" y2="{cy}" '
-            f'stroke="{t["sage"]}" stroke-width="1.5" stroke-dasharray="4 3"/>'
-            + text("mono", LINKS_LBL[i].upper(), (x1 + x2) / 2, cy - 14, 8.5,
-                   t["muted"], "middle", 0.12))
-    ret_y = cy + bh / 2 + 30
-    parts.append(
-        f'<path d="M{cx[-1]:.1f} {cy + bh / 2}V{ret_y}H{cx[0]:.1f}V{cy + bh / 2}" fill="none" '
-        f'stroke="{t["line"]}" stroke-width="1.2" stroke-dasharray="2 4"/>'
-        + text("mono", "RESPONSE", W / 2, ret_y + 18, 8.5, t["muted"], "middle", 0.12))
-    for i, (title, sub) in enumerate(NODES):
-        x = cx[i] - bw / 2
+            f'stroke="{t["sage"]}" stroke-width="1.5" stroke-dasharray="4 3"/>')
+    skeleton.append(
+        f'<line x1="{cx[0]:.1f}" x2="{cx[-1]:.1f}" y1="{cy + bh / 2 + 14}" y2="{cy + bh / 2 + 14}" '
+        f'stroke="{t["line"]}" stroke-dasharray="2 4"/>')
+    for i in range(n):
+        skeleton.append(
+            f'<g class="r" style="{delay(0.1 + i * 0.1)}"><rect x="{cx[i] - bw / 2:.1f}" '
+            f'y="{cy - bh / 2}" width="{bw}" height="{bh}" rx="8" fill="{t["soft"]}" '
+            f'stroke="{t["line"]}"/></g>')
+
+    for s, (idx, title, tags, nodes) in enumerate(SYSTEMS):
+        b = s * PERIOD
+        arrive = [b + 0.9 + i * 1.55 for i in range(n)]
+        g = f"g{s}"
+        kf.append(pulse_kf(g, [(b, b + PERIOD - fade)], fade))
+        css_rules.append(f".{g}{{animation:{g} {CYCLE:.0f}s linear infinite both}}")
+        ov = " ov" if s else ""
+        parts = [
+            text("mono", f"({idx})", pad, 112, 11, t["sage"], track=0.1)
+            + text("serif", title, pad + 40, 116, 32, t["fg"])
+            + text("mono", tags, pad + 40, 138, 9, t["muted"], track=0.12)
+        ]
+        for i, (label, detail) in enumerate(nodes):
+            size = fit("display", label, 15, bw - 24)
+            parts.append(
+                text("mono", f"{i + 1:02d}", cx[i], cy - 16, 8.5, t["sage"], "middle", 0.14)
+                + text("display", label, cx[i], cy + 8, size, t["fg"], "middle", -0.01))
+            # Inverted copy of the node, lit while the packet dwells on it.
+            nm = f"n{s}{i}"
+            kf.append(pulse_kf(nm, [(arrive[i], arrive[i] + 1.1)], 0.25))
+            css_rules.append(f".{nm}{{animation:{nm} {CYCLE:.0f}s linear infinite both}}")
+            parts.append(
+                f'<g class="{nm} ov" style="{delay(0)}"><rect x="{cx[i] - bw / 2:.1f}" y="{cy - bh / 2}" '
+                f'width="{bw}" height="{bh}" rx="8" fill="{t["fg"]}"/>'
+                + text("mono", f"{i + 1:02d}", cx[i], cy - 16, 8.5, t["bg"], "middle", 0.14)
+                + text("display", label, cx[i], cy + 8, size, t["bg"], "middle", -0.01) + "</g>")
+            # One caption at a time keeps the sheet quiet.
+            cp = f"c{s}{i}"
+            kf.append(pulse_kf(cp, [(arrive[i], arrive[i] + 1.45)], 0.3))
+            css_rules.append(f".{cp}{{animation:{cp} {CYCLE:.0f}s linear infinite both}}")
+            hide = "" if (s == 0 and i == 0) else " ov"
+            parts.append(
+                f'<g class="{cp}{hide}" style="{delay(0)}">'
+                + text("serif-i", detail, W / 2, 296, 21, t["fg"], "middle") + "</g>")
+        # Packet hopping node to node, dwelling on each.
+        pk = f"p{s}"
+        pts = [(0, 0.0)]
+        for i in range(n):
+            pts.append((arrive[i] if i else b + 0.0, i * step))
+            pts.append((arrive[i] + 1.1, i * step))
+        pts = sorted(set(pts))
+        pts = [(x, v) for x, v in pts]
+        pts.append((b + PERIOD - 0.01, (n - 1) * step))
+        pts.append((b + PERIOD, 0.0))
+        pts.append((CYCLE, 0.0))
+        dedup = {round(x, 3): v for x, v in pts}
+        kf.append(move_kf(pk, sorted(dedup.items())))
+        css_rules.append(f".{pk}{{animation:{pk} {CYCLE:.0f}s ease-in-out infinite both}}")
         parts.append(
-            f'<g class="r" style="{delay(0.1 + i * 0.1)}">'
-            f'<rect x="{x:.1f}" y="{cy - bh / 2}" width="{bw}" height="{bh}" rx="8" '
-            f'fill="{t["soft"]}" stroke="{t["line"]}"/>'
-            + text("display", title, cx[i], cy - 4, 17, t["fg"], "middle", -0.01)
-            + text("mono", sub.upper(), cx[i], cy + 18, 9, t["muted"], "middle", 0.1)
-            + f'<g class="n{i} ov" style="{delay(0)}"><rect x="{x:.1f}" y="{cy - bh / 2}" width="{bw}" height="{bh}" '
-            f'rx="8" fill="{t["fg"]}"/>'
-            + text("display", title, cx[i], cy - 4, 17, t["bg"], "middle", -0.01)
-            + text("mono", sub.upper(), cx[i], cy + 18, 9, t["bg"], "middle", 0.1)
-            + "</g></g>")
-    for cls, y in (("pk", cy), ("rt ov", ret_y)):
-        parts.append(
-            f'<g class="{cls}" style="{delay(0)}"><circle cx="{cx[0]:.1f}" cy="{y}" r="11" fill="{t["rust"]}" '
-            f'opacity=".22"/><circle cx="{cx[0]:.1f}" cy="{y}" r="5" fill="{t["rust"]}"/></g>')
-    return sheet(W, H, "".join(parts), t, css,
-                 "Backend request flow: Client, API, Cache, Database")
+            f'<g class="{pk}" style="{delay(0)}"><circle cx="{cx[0]:.1f}" cy="{cy + bh / 2 + 14}" r="9" '
+            f'fill="{t["rust"]}" opacity=".22"/><circle cx="{cx[0]:.1f}" cy="{cy + bh / 2 + 14}" r="4" '
+            f'fill="{t["rust"]}"/></g>')
+        layers.append(f'<g class="{g}{ov}" style="{delay(0)}">{"".join(parts)}</g>')
+
+    # System selector: three dots, the active one fills in.
+    dots = []
+    for s in range(len(SYSTEMS)):
+        x = W - pad - 36 + s * 18
+        nm = f"d{s}"
+        kf.append(pulse_kf(nm, [(s * PERIOD, s * PERIOD + PERIOD - fade)], fade))
+        css_rules.append(f".{nm}{{animation:{nm} {CYCLE:.0f}s linear infinite both}}")
+        dots.append(
+            f'<circle cx="{x}" cy="108" r="4.5" fill="none" stroke="{t["sage"]}"/>'
+            f'<circle class="{nm}{" ov" if s else ""}" style="{delay(0)}" cx="{x}" cy="108" r="4.5" '
+            f'fill="{t["rust"]}"/>')
+    body = "".join(skeleton) + "".join(dots) + "".join(layers)
+    return sheet(W, H, body, t, "".join(kf) + "".join(css_rules), "Request flow through three production systems")
 
 
 # ---------------------------------------------------------------- profile
