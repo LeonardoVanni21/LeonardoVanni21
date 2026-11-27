@@ -15,7 +15,7 @@ import requests
 
 from art import (PAD, PULSE_CSS, ROOT, USERNAME, W, delay, head, sheet, text,
                  width, write_all)
-from closers import flap, skyline, status
+from closers import flap, skyline
 from stats import MONTHS, grid, rng, short, streaks
 
 CONTRIB = os.path.join(ROOT, "data", "contributions.json")
@@ -235,7 +235,6 @@ def main():
     write_all("activity", activity(contrib))
     write_all("numbers", numbers(contrib, gh))
     write_all("languages", languages(gh))
-    write_all("status", status(contrib))
     write_all("skyline", skyline(contrib))
     write_all("flap", flap(contrib))
 

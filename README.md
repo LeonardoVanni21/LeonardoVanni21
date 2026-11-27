@@ -11,7 +11,7 @@
 
 <a href="https://leovanni.dev/"><picture><source media="(prefers-color-scheme: dark)" srcset="./art/pill-portfolio-dark.svg"><img src="./art/pill-portfolio-light.svg" height="40" alt="Portfolio"></picture></a> &nbsp; <a href="https://www.linkedin.com/in/leonardo-vanni-bonavigo-6a387020b/"><picture><source media="(prefers-color-scheme: dark)" srcset="./art/pill-linkedin-dark.svg"><img src="./art/pill-linkedin-light.svg" height="40" alt="LinkedIn"></picture></a> &nbsp; <a href="https://instagram.com/leonardobonavigo"><picture><source media="(prefers-color-scheme: dark)" srcset="./art/pill-instagram-dark.svg"><img src="./art/pill-instagram-light.svg" height="40" alt="Instagram"></picture></a>
 
-<br><br>
+<br>
 
 <a href="https://leovanni.dev/">
   <picture>
@@ -53,13 +53,6 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./art/languages-dark.svg">
   <img src="./art/languages-light.svg" width="860" alt="Top languages by code size across public repositories.">
-</picture>
-
-<br>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./art/status-dark.svg">
-  <img src="./art/status-light.svg" width="860" alt="Status page for the year: all systems operational, daily and weekly uptime bars, throughput graph and past incidents.">
 </picture>
 
 <br>

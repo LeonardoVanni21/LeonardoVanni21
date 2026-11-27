@@ -25,4 +25,4 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: refresh profile art [skip ci]"
-          file_pattern: "data/contributions.json data/github.json art/activity-*.svg art/numbers-*.svg art/languages-*.svg art/status-*.svg art/skyline-*.svg art/flap-*.svg"
+          file_pattern: "data/contributions.json data/github.json art/activity-*.svg art/numbers-*.svg art/languages-*.svg art/skyline-*.svg art/flap-*.svg"

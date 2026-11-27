@@ -21,14 +21,14 @@ W = 860  # every sheet shares one width so the README column stays aligned
 THEMES = {
     "light": dict(
         mode="light", bg="#e8e7df", fg="#111210", muted="#606459", line="#11121030",
-        soft="#dddcd2", ok="#55704f", warn="#b59a58", glow="#ffffff", glowop=".8", sage="#8e9a88", deep="#374332", rust="#8e2020",
+        soft="#dddcd2", glow="#ffffff", glowop=".8", sage="#8e9a88", deep="#374332", rust="#8e2020",
         heat=["#d7d8ce", "#c3cbb8", "#a3b09a", "#6f8268", "#374332"],
         langs=["#374332", "#6f8268", "#8e2020", "#b7a27a", "#a3b09a",
                "#606459", "#9aa08f", "#8a7f6a"],
     ),
     "dark": dict(
         mode="dark", bg="#111210", fg="#e8e7df", muted="#a0a298", line="#ffffff26",
-        soft="#1a1c19", ok="#7fa070", warn="#c9b48a", glow="#f4f6ec", glowop=".5", sage="#8e9a88", deep="#b7c9a9", rust="#d0705f",
+        soft="#1a1c19", glow="#f4f6ec", glowop=".5", sage="#8e9a88", deep="#b7c9a9", rust="#d0705f",
         heat=["#1d1f1b", "#2a3427", "#44593f", "#6f8a66", "#b7c9a9"],
         langs=["#b7c9a9", "#6f8a66", "#d0705f", "#c9b48a", "#5d7a55",
                "#7d8578", "#6b7466", "#8a7f6a"],

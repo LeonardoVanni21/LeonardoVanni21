@@ -9,194 +9,6 @@ from art import (PAD, PULSE_CSS, W, delay, head, sheet, text, width)
 from stats import MONTHS, WEEKDAYS, grid, parse, short, streaks
 
 
-def _weekday(d):
-    return d.weekday() < 5
-
-
-# ---------------------------------------------------------------- status page
-
-def _incidents(rows):
-    """Runs of idle days that include at least one weekday, newest first."""
-    out, run = [], []
-    for date, count, _ in rows:
-        if count == 0:
-            run.append(date)
-            continue
-        if len(run) >= 3 and any(_weekday(d) for d in run):
-            out.append(run)
-        run = []
-    return [(r[0], r[-1], len(r), sum(1 for d in r if _weekday(d))) for r in reversed(out)]
-
-
-def _severity(weekdays):
-    if weekdays >= 5:
-        return "MAJOR OUTAGE", "down"
-    if weekdays >= 3:
-        return "PARTIAL OUTAGE", "warn"
-    return "DEGRADED", "warn"
-
-
-def status(contrib):
-    rows = parse(contrib["days"])
-    s = streaks(contrib["days"])
-    cells, weeks = grid(contrib["days"])
-    daily = rows[-90:]
-
-    def day_state(date, count):
-        if count:
-            return "ok"
-        return "down" if _weekday(date) else "off"
-
-    d_states = [day_state(d, c) for d, c, _ in daily]
-    d_up = 100 * sum(1 for x in d_states if x != "down") / len(d_states)
-    all_down = sum(1 for d, c, _ in rows if c == 0 and _weekday(d))
-    year_up = 100 * (1 - all_down / sum(1 for d, _, _ in rows if _weekday(d)))
-
-    by_week = {}
-    for wk, wd, date, d in cells:
-        by_week.setdefault(wk, []).append((wd, d["count"], d["level"]))
-    w_states, w_totals = [], []
-    for wk in sorted(by_week):
-        days = by_week[wk]
-        if wk == 0 and len(days) < 7:
-            continue
-        elapsed = [c for wd, c, _ in days if 1 <= wd <= 5]
-        active = sum(1 for c in elapsed if c)
-        need = min(4, max(len(elapsed), 1))
-        w_states.append("ok" if active >= need else ("warn" if active >= 2 else "down"))
-        w_totals.append((sum(c for _, c, _ in days), wk))
-    w_up = 100 * sum(1 for x in w_states if x == "ok") / len(w_states)
-    totals = [v for v, _ in w_totals]
-    peak = max(totals)
-    peak_wk = w_totals[totals.index(peak)][1]
-    peak_date = min(d for wk, wd, d, _ in cells if wk == peak_wk)
-    p95 = sorted(totals)[int(0.95 * (len(totals) - 1))]
-    incidents = _incidents(rows)[:3]
-    healthy = s["cur"] > 0
-
-    H = 544 + 30 * (max(len(incidents), 1) - 1) + 84  # last incident row + legend
-
-    def build(t):
-        ink = {"ok": t["ok"], "warn": t["warn"], "down": t["rust"], "off": t["heat"][0]}
-        css = PULSE_CSS + (
-            "@keyframes up{from{transform:scaleY(0);opacity:0}}"
-            "@keyframes rise{from{opacity:0;transform:translateY(12px)}}"
-            "@keyframes draw{from{stroke-dashoffset:1}}"
-            "@keyframes fade{from{opacity:0}}"
-            "@keyframes sweep{0%{transform:translateX(0)}60%,100%{transform:translateX(SWEEPXpx)}}"
-            ".b{animation:up .5s cubic-bezier(.22,1,.36,1) both;"
-            "transform-box:fill-box;transform-origin:bottom}"
-            ".h{animation:rise .8s cubic-bezier(.22,1,.36,1) both}"
-            ".ln{stroke-dasharray:1;animation:draw 2.2s cubic-bezier(.65,0,.35,1) .6s both}"
-            ".ar{animation:fade 1.2s ease-out 1.6s both}"
-            ".sw{animation:sweep 7s ease-in-out infinite}").replace("SWEEPX", str(W - 2 * PAD + 120))
-        parts = [head(t, "STATUS / LEONARDO VANNI", "AUTO-CHECKED EVERY DAY", live=True)]
-
-        # banner
-        tone = t["ok"] if healthy else t["warn"]
-        title = "All systems operational" if healthy else "Recovering, back soon"
-        parts.append(
-            f'<g class="h" style="{delay(0.05)}">'
-            f'<rect x="{PAD}" y="88" width="{W - 2 * PAD}" height="72" rx="12" fill="{tone}" '
-            f'fill-opacity=".14" stroke="{tone}" stroke-opacity=".55"/>'
-            f'<circle cx="{PAD + 36}" cy="124" r="15" fill="{tone}"/>'
-            f'<path d="M{PAD + 29} {124} l5 5 l9 -10" fill="none" stroke="{t["bg"]}" stroke-width="2.4" '
-            f'stroke-linecap="round" stroke-linejoin="round"/>'
-            + text("serif", title, PAD + 68, 133, 34, t["fg"])
-            + text("mono", f'{s["cur"]} DAYS WITHOUT INCIDENT', W - PAD - 20, 119, 10.5, t["deep"],
-                   "end", 0.14)
-            + text("mono", f"{year_up:.1f}% UPTIME / 12 MONTHS", W - PAD - 20, 137, 9, t["muted"],
-                   "end", 0.12) + "</g>")
-
-        def label(y, name, right):
-            return (text("mono-b", name, PAD, y, 10.5, t["fg"], track=0.14)
-                    + text("mono", right, W - PAD, y, 10, t["muted"], "end", 0.12))
-
-        def axis(y, left, right):
-            return (text("mono", left, PAD, y, 8.5, t["muted"], track=0.12)
-                    + text("mono", right, W - PAD, y, 8.5, t["muted"], "end", 0.12))
-
-        clip = []
-
-        def bars(y, states, bw, pitch, h):
-            out = []
-            for i, st in enumerate(states):
-                x = PAD + i * pitch
-                out.append(
-                    f'<rect class="b" style="{delay(0.2 + i * 0.012)}" x="{x:.1f}" y="{y}" width="{bw}" '
-                    f'height="{h}" rx="2.2" fill="{ink[st]}"/>')
-                clip.append(f'<rect x="{x:.1f}" y="{y}" width="{bw}" height="{h}" rx="2.2"/>')
-            return "".join(out)
-
-        # daily bars
-        parts.append(label(196, "DAILY COMMITS", f"{d_up:.1f}% UPTIME · LAST 90 DAYS"))
-        parts.append(bars(206, d_states, 7, 8.5, 36))
-        parts.append(axis(258, "90 DAYS AGO", "TODAY"))
-        # weekly bars
-        wp = (W - 2 * PAD + 2.4) / len(w_states)
-        parts.append(label(292, "WEEKLY CADENCE", f"{w_up:.0f}% OF WEEKS FULLY OPERATIONAL"))
-        parts.append(bars(302, w_states, wp - 2.4, wp, 36))
-        parts.append(axis(354, f"{len(w_states)} WEEKS AGO", "THIS WEEK"))
-
-        # throughput graph
-        gy0, gh, gw = 398, 54, W - 2 * PAD
-        xs = [PAD + i * gw / (len(totals) - 1) for i in range(len(totals))]
-        ys = [gy0 + gh - gh * v / peak for v in totals]
-        line = "M" + " L".join(f"{x:.1f} {y:.1f}" for x, y in zip(xs, ys))
-        area = f"{line} L{xs[-1]:.1f} {gy0 + gh} L{xs[0]:.1f} {gy0 + gh}Z"
-        py = gy0 + gh - gh * p95 / peak
-        parts.append(label(388, "THROUGHPUT", f"PEAK {peak} · WEEK OF {short(peak_date).upper()}"))
-        parts.append(
-            f'<defs><linearGradient id="ga" x1="0" y1="0" x2="0" y2="1">'
-            f'<stop offset="0" stop-color="{t["ok"]}" stop-opacity=".42"/>'
-            f'<stop offset="1" stop-color="{t["ok"]}" stop-opacity="0"/></linearGradient></defs>'
-            f'<path class="ar" style="{delay(0)}" d="{area}" fill="url(#ga)"/>'
-            f'<line x1="{PAD}" x2="{W - PAD}" y1="{py:.1f}" y2="{py:.1f}" stroke="{t["muted"]}" '
-            f'stroke-dasharray="3 4" stroke-opacity=".7"/>'
-            + text("mono", f"P95 {p95}", PAD + 2, py - 5, 8, t["muted"], track=0.1)
-            + f'<path class="ln" style="{delay(0)}" pathLength="1" d="{line}" fill="none" '
-            f'stroke="{t["ok"]}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
-            f'<circle cx="{xs[totals.index(peak)]:.1f}" cy="{ys[totals.index(peak)]:.1f}" r="3.6" '
-            f'fill="{t["rust"]}"/>')
-        parts.append(axis(gy0 + gh + 16, "12 MONTHS AGO", "NOW"))
-
-        # scan band across the bars
-        parts.append(
-            f'<defs><clipPath id="bc">{"".join(clip)}</clipPath>'
-            f'<linearGradient id="sg2"><stop offset="0" stop-color="{t["glow"]}" stop-opacity="0"/>'
-            f'<stop offset=".5" stop-color="{t["glow"]}" stop-opacity="{t["glowop"]}"/>'
-            f'<stop offset="1" stop-color="{t["glow"]}" stop-opacity="0"/></linearGradient></defs>'
-            f'<g clip-path="url(#bc)"><rect class="sw" style="{delay(1.5)}" x="{PAD - 110}" y="200" '
-            f'width="70" height="160" fill="url(#sg2)"/></g>')
-
-        # incidents
-        iy = gy0 + gh + 52
-        parts.append(text("mono-b", "PAST INCIDENTS", PAD, iy, 10.5, t["fg"], track=0.14))
-        parts.append(f'<line x1="{PAD}" x2="{W - PAD}" y1="{iy + 10}" y2="{iy + 10}" stroke="{t["line"]}"/>')
-        if not incidents:
-            parts.append(text("serif-i", "No incidents reported.", PAD, iy + 40, 18, t["muted"]))
-        for k, (a, b, n, wd) in enumerate(incidents):
-            y = iy + 40 + k * 30
-            sev, kind = _severity(wd)
-            col = ink["down"] if kind == "down" else ink["warn"]
-            rng_txt = short(a).upper() if a == b else f"{short(a).upper()} - {short(b).upper()}"
-            parts.append(
-                f'<g class="h" style="{delay(1.2 + k * 0.15)}">'
-                + text("mono", rng_txt, PAD, y, 10, t["muted"], track=0.1)
-                + f'<circle cx="{PAD + 150}" cy="{y - 4}" r="4" fill="{col}"/>'
-                + text("mono-b", sev, PAD + 162, y, 9.5, col, track=0.14)
-                + text("serif", f"{wd} weekday{'s' if wd != 1 else ''} without commits. Resolved after {n} days.",
-                       PAD + 300, y + 1, 18, t["fg"]) + "</g>")
-        lx = PAD
-        for key, name in (("ok", "OPERATIONAL"), ("warn", "DEGRADED"), ("down", "OUTAGE"),
-                          ("off", "WEEKEND OFF")):
-            parts.append(f'<circle cx="{lx + 4}" cy="{H - 30}" r="4" fill="{ink[key]}"/>'
-                         + text("mono", name, lx + 14, H - 27, 8.5, t["muted"], track=0.12))
-            lx += width("mono", name, 8.5, 0.12) + 42
-        return sheet(W, H, "".join(parts), t, css, "Status page for Leonardo Vanni's year")
-    return build
-
-
 # ---------------------------------------------------------------- skyline
 
 def _rng(seed):
@@ -233,8 +45,14 @@ def skyline(contrib):
     months = {}
     for d, c, _ in parse(contrib["days"]):
         months[(d.year, d.month)] = months.get((d.year, d.month), 0) + c
-    month_keys = sorted(months)
     m_peak = max(months.values())
+    bands = []  # [month key, first week, one past last week]
+    for i in range(weeks):
+        key = (starts[i].year, starts[i].month)
+        if bands and bands[-1][0] == key:
+            bands[-1][2] = i + 1
+        else:
+            bands.append([key, i, i + 1])
 
     H, ground = 496, 412
     pitch = (W - 2 * PAD + 2.5) / weeks
@@ -283,6 +101,12 @@ def skyline(contrib):
 
         rnd = _rng(7)
         sky_items = []
+        for j, (key, i0, i1) in enumerate(bands):
+            if j % 2 == 0:
+                bx = PAD + i0 * pitch - 1.25
+                sky_items.append(
+                    f'<rect x="{bx:.1f}" y="69" width="{(i1 - i0) * pitch:.1f}" height="{ground - 69}" '
+                    f'fill="{t["fg"]}" opacity="{.028 if dark else .035}"/>')
         if dark:
             for i in range(46):
                 x, y = PAD + rnd() * (W - 2 * PAD), 80 + rnd() * 150
@@ -310,17 +134,23 @@ def skyline(contrib):
             f'<g class="pl" style="{delay(0)}"><g transform="translate(0 96)">'
             f'<path d="M0 0h14l-3 -3h-3l-1 3zM5 0l-5 5h3l5 -5z" fill="{t["fg"]}" opacity=".75"/>'
             f'<circle class="bl" style="{delay(0)}" cx="-1" cy="0" r="1.8" fill="{t["rust"]}"/></g></g>')
+        for g in (50, 100, 150, 200):
+            gy = ground - 14 - (max_h - 14) * g / peak
+            sky_items.append(
+                f'<line x1="{PAD}" x2="{W - PAD}" y1="{gy:.1f}" y2="{gy:.1f}" stroke="{t["fg"]}" '
+                f'stroke-opacity=".16" stroke-dasharray="2 5"/>'
+                + text("mono", str(g), PAD - 8, gy + 3, 8, t["muted"], "end", 0.1))
         P.append(f'<g clip-path="url(#skyc)">{"".join(sky_items)}</g>')
 
         # back layer: one wide tower per month
-        mw = (W - 2 * PAD) / len(month_keys)
         back = []
-        for i, key in enumerate(month_keys):
-            h = 46 + 104 * (months[key] / m_peak)
-            x = PAD + i * mw + 3
-            back.append(f'<rect x="{x:.1f}" y="{ground - h:.1f}" width="{mw - 6:.1f}" height="{h:.1f}" '
+        for key, i0, i1 in bands:
+            h = 46 + 104 * (months.get(key, 0) / m_peak)
+            x = PAD + i0 * pitch + 3
+            mw = (i1 - i0) * pitch - 8
+            back.append(f'<rect x="{x:.1f}" y="{ground - h:.1f}" width="{mw:.1f}" height="{h:.1f}" '
                         f'fill="{k["back"]}"/>'
-                        f'<rect x="{x:.1f}" y="{ground - h:.1f}" width="{mw - 6:.1f}" height="{h:.1f}" '
+                        f'<rect x="{x:.1f}" y="{ground - h:.1f}" width="{mw:.1f}" height="{h:.1f}" '
                         f'fill="url(#wp)"/>')
         city = ["".join(back)]
 
@@ -328,7 +158,7 @@ def skyline(contrib):
         top_order = sorted(range(weeks), key=lambda i: -totals[i])[:6]
         for i in range(weeks):
             v = totals[i]
-            h = 14 + (max_h - 14) * (v / peak) ** 0.8
+            h = 14 + (max_h - 14) * (v / peak)
             x = PAD + i * pitch
             top = ground - h
             r = _rng(starts[i].toordinal())
@@ -351,6 +181,7 @@ def skyline(contrib):
                          f'cy="{top - 10:.1f}" r="1.6" fill="{t["rust"]}"/>')
             city.append(
                 f'<g class="bd" style="{delay(0.1 + i * 0.03)}">'
+                f'<title>Week of {short(starts[i])}: {v} contributions</title>'
                 f'<rect x="{x:.1f}" y="{top:.1f}" width="{bw:.1f}" height="{h:.1f}" fill="{k["front"]}"/>'
                 f'<rect x="{x:.1f}" y="{top:.1f}" width="{bw:.1f}" height="1.4" fill="{k["edge"]}"/>'
                 f'{wins}{extra}</g>')
@@ -363,13 +194,30 @@ def skyline(contrib):
         P.append(f'<rect x="1" y="{ground}" width="{W - 2}" height="{H - ground - 1}" fill="url(#fadeR)"/>')
         P.append(f'<line x1="{PAD}" x2="{W - PAD}" y1="{ground}" y2="{ground}" stroke="{t["line"]}"/>')
 
-        seen = set()
-        for i in range(weeks):
-            key = (starts[i].year, starts[i].month)
-            if key not in seen and starts[i].day <= 7:
-                seen.add(key)
-                P.append(text("mono", short(starts[i]).split()[0].upper(), PAD + i * pitch, ground + 18,
-                              8.5, t["muted"], track=0.12))
+        ticks = "".join(f"M{PAD + i * pitch + bw / 2:.1f} {ground + 2}v4" for i in range(weeks))
+        P.append(f'<path d="{ticks}" stroke="{t["muted"]}" stroke-opacity=".55" stroke-width="1" fill="none"/>')
+        labeled = False
+        for key, i0, i1 in bands:
+            bx0, bx1 = PAD + i0 * pitch - 1.25, PAD + i1 * pitch - 1.25
+            P.append(f'<line x1="{bx0:.1f}" x2="{bx0:.1f}" y1="{ground + 8}" y2="{ground + 28}" '
+                     f'stroke="{t["line"]}"/>')
+            if bx1 - bx0 < 34:
+                continue
+            name = MONTHS[key[1] - 1].upper()
+            if not labeled or key[1] == 1:
+                name += f" '{key[0] % 100:02d}"
+            labeled = True
+            P.append(text("mono", name, (bx0 + bx1) / 2, ground + 22, 8.5, t["deep"], "middle", 0.12))
+
+        # "you are here" pin on the current week, named on the time axis
+        li = weeks - 1
+        lcx = PAD + li * pitch + bw / 2
+        ltop = ground - (14 + (max_h - 14) * totals[li] / peak)
+        P.append(
+            f'<g class="lb" style="{delay(0.2)}">'
+            f'<path d="M{lcx - 4:.1f} {ltop - 10:.1f}h8l-4 6z" fill="{t["rust"]}"/>'
+            f'<path d="M{lcx - 3.5:.1f} {ground + 40}h7l-3.5 -6z" fill="{t["rust"]}"/>'
+            + text("mono-b", "THIS WEEK", lcx - 9, ground + 40, 8.5, t["fg"], "end", 0.14) + "</g>")
 
         # flag on the busiest week
         fx = PAD + peak_i * pitch + bw / 2
@@ -384,7 +232,8 @@ def skyline(contrib):
             f'<rect x="{lx - 8:.1f}" y="{ftop - 62:.1f}" width="{lw:.1f}" height="20" rx="10" '
             f'fill="{k["river"] if dark else t["bg"]}" fill-opacity=".85" stroke="{t["line"]}"/>'
             + text("mono-b", lbl, lx + 4, ftop - 48.5, 9.5, t["fg"], track=0.12) + "</g>")
-        P.append(text("mono", "WINDOWS LIGHT UP WITH ACTIVITY", W - PAD, H - 22, 9, t["muted"], "end", 0.14))
+        P.append(text("mono", "1 BUILDING = 1 WEEK  /  HEIGHT = CONTRIBUTIONS  /  LIT WINDOWS = ACTIVITY",
+                      PAD, H - 22, 8.5, t["muted"], track=0.12))
         body = "".join(P)
         # Everything between the header and the border is clipped to the rounded sheet.
         i = body.rindex("<rect", 0, body.index('fill="url(#sky)"'))
@@ -420,7 +269,7 @@ def _pages(contrib):
     for d, c, _ in rows:
         by_wd[d.weekday()] += c
     weekend_active = sum(1 for d, c, _ in rows if c and d.weekday() >= 5)
-    # Sunday-first weeks, the same buckets as the skyline and the status page.
+    # Sunday-first weeks, the same buckets as the skyline.
     cells, _ = grid(contrib["days"])
     weeks = {}
     for wk, _wd, d, di in cells:
