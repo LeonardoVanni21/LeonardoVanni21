@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
       - run: pip install -r scripts/requirements-ci.txt
       - run: python scripts/fetch_contributions.py
       # Public profile data only, so the built-in token is enough (no PAT).
@@ -25,4 +25,4 @@ jobs:
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: refresh profile art [skip ci]"
-          file_pattern: "data/contributions.json data/github.json art/activity-*.svg art/numbers-*.svg art/languages-*.svg art/snake-*.svg"
+          file_pattern: "data/contributions.json data/github.json art/activity-*.svg art/numbers-*.svg art/languages-*.svg art/status-*.svg art/skyline-*.svg art/flap-*.svg"

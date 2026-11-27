@@ -1,4 +1,4 @@
-"""Data-driven sheets rebuilt daily by CI: activity, numbers, languages, snake.
+"""Data-driven sheets rebuilt daily by CI: activity, numbers, languages and the closing sheets.
 
 Reads data/contributions.json (scraped by fetch_contributions.py) and the
 GitHub GraphQL API. Public profile data only, so the workflow token is enough.
@@ -13,14 +13,14 @@ from collections import defaultdict
 
 import requests
 
-from art import (PULSE_CSS, ROOT, USERNAME, W, delay, live_dot, sheet, text,
+from art import (PAD, PULSE_CSS, ROOT, USERNAME, W, delay, head, sheet, text,
                  width, write_all)
+from closers import flap, skyline, status
+from stats import MONTHS, grid, rng, short, streaks
 
 CONTRIB = os.path.join(ROOT, "data", "contributions.json")
 GH_CACHE = os.path.join(ROOT, "data", "github.json")
-MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-PAD, LABEL_W, PITCH, CELL = 44, 30, 14.0, 11
+LABEL_W, PITCH, CELL = 30, 14.0, 11
 OX = PAD + LABEL_W
 
 QUERY = """
@@ -61,64 +61,6 @@ def fetch_github():
     with open(GH_CACHE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=1)
     return data
-
-
-def streaks(days):
-    days = sorted(days, key=lambda d: d["date"])
-    dates = [dt.date.fromisoformat(d["date"]) for d in days]
-    counts = [d["count"] for d in days]
-    i = len(days) - 1
-    if counts[i] == 0:  # a still-empty "today" must not break the streak
-        i -= 1
-    cur, cur_end, cur_start = 0, dates[i] if i >= 0 else None, None
-    while i >= 0 and counts[i] > 0:
-        cur, cur_start, i = cur + 1, dates[i], i - 1
-    best = run = 0
-    best_start = best_end = run_start = None
-    for j, c in enumerate(counts):
-        if c > 0:
-            run += 1
-            run_start = dates[j] if run == 1 else run_start
-            if run > best:
-                best, best_start, best_end = run, run_start, dates[j]
-        else:
-            run = 0
-    return dict(cur=cur, cur_range=(cur_start, cur_end) if cur else None,
-                best=best, best_range=(best_start, best_end),
-                active=sum(1 for c in counts if c), n=len(counts),
-                top=max(counts))
-
-
-def short(d):
-    return f"{MONTHS[d.month - 1]} {d.day}"
-
-
-def rng(r):
-    if not r:
-        return "—"
-    a, b = r
-    return short(a) if a == b else f"{short(a)} – {short(b)}"
-
-
-def head(t, left, right, live=False):
-    x = PAD + (16 if live else 0)
-    return ((live_dot(t, PAD + 3, 46.5) if live else "")
-            + text("mono", left, x, 50, 11, t["muted"], track=0.14)
-            + text("mono", right, W - PAD, 50, 11, t["muted"], "end", 0.14)
-            + f'<line x1="{PAD}" x2="{W - PAD}" y1="68" y2="68" stroke="{t["line"]}"/>')
-
-
-def grid(days):
-    """Place each day on the Sunday-first week grid GitHub uses."""
-    cells, week, prev = [], 0, None
-    for d in days:
-        date = dt.date.fromisoformat(d["date"])
-        wd = (date.weekday() + 1) % 7
-        if prev is not None and wd <= prev:
-            week += 1
-        prev = wd
-        cells.append((week, wd, date, d))
-    return cells, week + 1
 
 
 # ---------------------------------------------------------------- activity
@@ -282,89 +224,6 @@ def languages(gh):
     return build
 
 
-# ---------------------------------------------------------------- snake
-
-BODY = 7           # head plus six followers
-STEP = 0.05        # seconds per grid cell
-HOLD = 3.0         # pause once the board is clean
-
-
-def snake(contrib):
-    cells, weeks = grid(contrib["days"])
-    n = weeks * 7
-    oy, H = 112, 270
-    pts = []
-    for w in range(weeks):
-        for r in (range(7) if w % 2 == 0 else range(6, -1, -1)):
-            pts.append((OX + w * PITCH + CELL / 2, oy + r * PITCH + CELL / 2))
-    move = (n - 1) * STEP
-    cycle = move + HOLD
-    m = move / cycle
-    freeze = os.environ.get("ART_FREEZE")
-    # A column counts as eaten once the head is halfway down it.
-    eaten_at = [((w * 7 + 3) / (n - 1)) * m for w in range(weeks)]
-
-    def build(t):
-        parts = [head(t, "PLAY / SNAKE", "IT EATS THE YEAR, THEN STARTS OVER")]
-        for wk, wd, date, d in cells:
-            parts.append(
-                f'<rect x="{OX + wk * PITCH:.1f}" y="{oy + wd * PITCH:.1f}" width="{CELL}" '
-                f'height="{CELL}" rx="3" fill="{t["heat"][min(d["level"], 4)]}"/>')
-
-        def eaten_cells():
-            return "".join(
-                f'<rect x="{OX + wk * PITCH - .6:.1f}" y="{oy + wd * PITCH - .6:.1f}" '
-                f'width="{CELL + 1.2}" height="{CELL + 1.2}" rx="3.4" fill="{t["heat"][0]}"/>'
-                for wk, wd, _, _ in cells)
-
-        def seg(k):
-            size = CELL + (2 if k == 0 else 0)
-            fill = t["rust"] if k == 0 else t["deep"]
-            op = 1 if k == 0 else max(0.35, 1 - k * 0.11)
-            return (f'<rect x="{-size / 2}" y="{-size / 2}" width="{size}" height="{size}" '
-                    f'rx="3.5" fill="{fill}" opacity="{op:.2f}"')
-
-        if freeze:
-            tt = min(float(freeze), move)
-            head_i = tt / STEP
-            cols = sum(1 for e in eaten_at if e * cycle <= tt)
-            if cols:
-                parts.append(f'<clipPath id="eat"><rect x="{OX - 3}" y="{oy - 3}" '
-                             f'width="{cols * PITCH + 3:.1f}" height="{7 * PITCH + 4:.0f}"/></clipPath>'
-                             f'<g clip-path="url(#eat)">{eaten_cells()}</g>')
-            for k in range(BODY - 1, -1, -1):
-                i = int(max(min(head_i - k, n - 1), 0))
-                x, y = pts[i]
-                parts.append(f'<g transform="translate({x:.1f} {y:.1f})">{seg(k)}/></g>')
-        else:
-            widths = ["0"] + [f"{(w + 1) * PITCH + 3:.1f}" for w in range(weeks)]
-            times = ["0"] + [f"{e:.4f}" for e in eaten_at]
-            fade = f"{(cycle - 0.9) / cycle:.4f}"
-            parts.append(
-                f'<clipPath id="eat"><rect x="{OX - 3}" y="{oy - 3}" width="0" '
-                f'height="{7 * PITCH + 4:.0f}">'
-                f'<animate attributeName="width" dur="{cycle:.2f}s" repeatCount="indefinite" '
-                f'calcMode="discrete" keyTimes="{";".join(times)}" values="{";".join(widths)}"/>'
-                f'</rect></clipPath>'
-                f'<g clip-path="url(#eat)"><g>{eaten_cells()}'
-                f'<animate attributeName="opacity" dur="{cycle:.2f}s" repeatCount="indefinite" '
-                f'keyTimes="0;{fade};1" values="1;1;0"/></g></g>')
-            d = "M" + " L".join(f"{x:.1f} {y:.1f}" for x, y in pts)
-            for k in range(BODY - 1, -1, -1):
-                lag = k * STEP / cycle
-                parts.append(
-                    f'<g>{seg(k)}>'
-                    f'<animateMotion dur="{cycle:.2f}s" repeatCount="indefinite" calcMode="linear" '
-                    f'keyPoints="0;0;1;1" keyTimes="0;{lag:.4f};{lag + m:.4f};1" path="{d}"/>'
-                    f'<animate attributeName="opacity" dur="{cycle:.2f}s" repeatCount="indefinite" '
-                    f'keyTimes="0;{fade};1" values="{1 if k == 0 else max(0.35, 1 - k * 0.11):.2f};'
-                    f'{1 if k == 0 else max(0.35, 1 - k * 0.11):.2f};0"/></rect></g>')
-        parts.append(text("mono", "THE BOARD IS YOUR LAST 12 MONTHS OF REAL COMMITS",
-                          PAD, H - 24, 9, t["muted"], track=0.14))
-        return sheet(W, H, "".join(parts), t, "", "A snake eating the contribution grid")
-    return build
-
-
 def main():
     with open(CONTRIB, encoding="utf-8") as f:
         contrib = json.load(f)
@@ -376,7 +235,9 @@ def main():
     write_all("activity", activity(contrib))
     write_all("numbers", numbers(contrib, gh))
     write_all("languages", languages(gh))
-    write_all("snake", snake(contrib))
+    write_all("status", status(contrib))
+    write_all("skyline", skyline(contrib))
+    write_all("flap", flap(contrib))
 
 
 if __name__ == "__main__":

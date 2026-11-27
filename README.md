@@ -58,9 +58,22 @@
 <br>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./art/snake-dark.svg">
-  <img src="./art/snake-light.svg" width="860" alt="A snake eating the contribution grid, then starting over.">
+  <source media="(prefers-color-scheme: dark)" srcset="./art/status-dark.svg">
+  <img src="./art/status-light.svg" width="860" alt="Status page for the year: all systems operational, daily and weekly uptime bars, throughput graph and past incidents.">
 </picture>
 
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./art/skyline-dark.svg">
+  <img src="./art/skyline-light.svg" width="860" alt="Night and day skyline, one building per week, windows lit by activity.">
+</picture>
+
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./art/flap-dark.svg">
+  <img src="./art/flap-light.svg" width="860" alt="Split-flap board flipping between records and recent form.">
+</picture>
 
 </div>

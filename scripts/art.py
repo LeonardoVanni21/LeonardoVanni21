@@ -15,19 +15,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 ART_DIR = os.path.join(ROOT, "art")
 
+PAD = 44
 W = 860  # every sheet shares one width so the README column stays aligned
 
 THEMES = {
     "light": dict(
-        bg="#e8e7df", fg="#111210", muted="#606459", line="#11121030",
-        soft="#dddcd2", glow="#ffffff", glowop=".8", sage="#8e9a88", deep="#374332", rust="#8e2020",
+        mode="light", bg="#e8e7df", fg="#111210", muted="#606459", line="#11121030",
+        soft="#dddcd2", ok="#55704f", warn="#b59a58", glow="#ffffff", glowop=".8", sage="#8e9a88", deep="#374332", rust="#8e2020",
         heat=["#d7d8ce", "#c3cbb8", "#a3b09a", "#6f8268", "#374332"],
         langs=["#374332", "#6f8268", "#8e2020", "#b7a27a", "#a3b09a",
                "#606459", "#9aa08f", "#8a7f6a"],
     ),
     "dark": dict(
-        bg="#111210", fg="#e8e7df", muted="#a0a298", line="#ffffff26",
-        soft="#1a1c19", glow="#f4f6ec", glowop=".5", sage="#8e9a88", deep="#b7c9a9", rust="#d0705f",
+        mode="dark", bg="#111210", fg="#e8e7df", muted="#a0a298", line="#ffffff26",
+        soft="#1a1c19", ok="#7fa070", warn="#c9b48a", glow="#f4f6ec", glowop=".5", sage="#8e9a88", deep="#b7c9a9", rust="#d0705f",
         heat=["#1d1f1b", "#2a3427", "#44593f", "#6f8a66", "#b7c9a9"],
         langs=["#b7c9a9", "#6f8a66", "#d0705f", "#c9b48a", "#5d7a55",
                "#7d8578", "#6b7466", "#8a7f6a"],
@@ -119,6 +120,14 @@ PULSE_CSS = ("@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}"
 
 def live_dot(t, x, y):
     return f'<circle class="dot" cx="{x}" cy="{y}" r="3.2" fill="{t["sage"]}"/>'
+
+
+def head(t, left, right, live=False):
+    x = PAD + (16 if live else 0)
+    return ((live_dot(t, PAD + 3, 46.5) if live else "")
+            + text("mono", left, x, 50, 11, t["muted"], track=0.14)
+            + text("mono", right, W - PAD, 50, 11, t["muted"], "end", 0.14)
+            + f'<line x1="{PAD}" x2="{W - PAD}" y1="68" y2="68" stroke="{t["line"]}"/>')
 
 
 def delay(seconds):
