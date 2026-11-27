@@ -5,26 +5,24 @@ on:
   workflow_dispatch: {}
   push:
     branches: [main]
+    paths: ["scripts/**", "data/portrait.txt", ".github/workflows/update-profile-art.yml"]
 permissions:
   contents: write
 jobs:
-  heatmap:
+  art:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      # Only the lightweight deps — the portrait/info-card libs run locally.
       - run: pip install -r scripts/requirements-ci.txt
       - run: python scripts/fetch_contributions.py
-      - run: python scripts/render_heatmap_svg.py
-      - run: python scripts/make_streak_card.py
       # Public profile data only, so the built-in token is enough (no PAT).
-      - run: python scripts/make_github_cards.py
+      - run: python scripts/gen_live.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: refresh contribution graph [skip ci]"
-          file_pattern: "data/contributions.json contrib-heatmap.svg streak-card.svg stats-card.svg langs-card.svg"
+          commit_message: "chore: refresh profile art [skip ci]"
+          file_pattern: "data/contributions.json data/github.json art/activity-*.svg art/numbers-*.svg art/languages-*.svg"

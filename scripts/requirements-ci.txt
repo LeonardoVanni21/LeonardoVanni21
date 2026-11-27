@@ -1,4 +1,3 @@
-# Lightweight deps for the daily heatmap refresh in CI.
-# The portrait/info-card libraries (pillow, opencv, rembg) only run locally.
 requests==2.32.3
 beautifulsoup4==4.12.3
+fonttools==4.64.0
